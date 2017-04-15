@@ -3,7 +3,7 @@
 //  Pods
 //
 //  Created by Wenchao Ding on 12/3/15.
-//
+//  Updated by Matteo Danelli on 14/3/17.
 //
 
 #import "FSCalendarCell.h"
@@ -46,7 +46,7 @@
 }
 
 - (void)commonInit
-{   
+{
     UILabel *label;
     CAShapeLayer *shapeLayer;
     UIImageView *imageView;
@@ -154,7 +154,7 @@
                                        CGRectGetMaxY(_shapeLayer.frame)+eventSize*0.17+self.preferredEventOffset.y,
                                        self.fs_width,
                                        eventSize*0.83
-                                      );
+                                       );
     
 }
 
@@ -255,7 +255,7 @@
     
     _eventIndicator.numberOfEvents = self.numberOfEvents;
     _eventIndicator.color = self.colorsForEvents;
-
+    
 }
 
 - (UIColor *)colorForCurrentStateInDictionary:(NSDictionary *)dictionary
@@ -331,16 +331,16 @@
 \
 - (void)set##CAPITAL:(CGPoint)NAME \
 { \
-    BOOL diff = !CGPointEqualToPoint(NAME, self.NAME); \
-    _##NAME = NAME; \
-    if (diff) { \
-        [self setNeedsLayout]; \
-    } \
+BOOL diff = !CGPointEqualToPoint(NAME, self.NAME); \
+_##NAME = NAME; \
+if (diff) { \
+[self setNeedsLayout]; \
+} \
 } \
 \
 - (CGPoint)NAME \
 { \
-    return CGPointEqualToPoint(_##NAME, CGPointInfinity) ? ALTERNATIVE : _##NAME; \
+return CGPointEqualToPoint(_##NAME, CGPointInfinity) ? ALTERNATIVE : _##NAME; \
 }
 
 OFFSET_PROPERTY(preferredTitleOffset, PreferredTitleOffset, _appearance.titleOffset);
@@ -418,14 +418,33 @@ OFFSET_PROPERTY(preferredEventOffset, PreferredEventOffset, _appearance.eventOff
     [super layoutSublayersOfLayer:layer];
     if (layer == self.layer) {
         
-        CGFloat diameter = MIN(MIN(self.fs_width, self.fs_height),FSCalendarMaximumEventDotDiameter);
+        CGFloat diameter = 4.f;
         for (int i = 0; i < self.eventLayers.count; i++) {
-            CALayer *eventLayer = [self.eventLayers pointerAtIndex:i];
-            eventLayer.hidden = i >= self.numberOfEvents;
-            if (!eventLayer.hidden) {
-                eventLayer.frame = CGRectMake(2*i*diameter, (self.fs_height-diameter)*0.5, diameter, diameter);
-                if (eventLayer.cornerRadius != diameter/2) {
-                    eventLayer.cornerRadius = diameter/2;
+            if (i < self.numberOfEvents) {
+                if (i == 2) {
+                    CALayer *eventLayer = [self.eventLayers pointerAtIndex:i];
+                    eventLayer.hidden = i >= self.numberOfEvents;
+                    
+                    eventLayer.frame = CGRectMake(2*i*diameter, (self.fs_height-diameter)*0.5, diameter, diameter);
+                    
+                    CALayer *vLayer = [CALayer layer];
+                    vLayer.backgroundColor = eventLayer.backgroundColor;
+                    vLayer.frame = CGRectMake((diameter/2)-(1.f/2), 0, 1.f, diameter);
+                    
+                    CALayer *hLayer = [CALayer layer];
+                    hLayer.backgroundColor = eventLayer.backgroundColor;
+                    hLayer.frame = CGRectMake(0, (diameter/2)-(1.f/2), diameter, 1.f);
+                    
+                    eventLayer.backgroundColor = [UIColor clearColor].CGColor;
+                    [eventLayer addSublayer:hLayer];
+                    [eventLayer addSublayer:vLayer];
+                } else {
+                    CALayer *eventLayer = [self.eventLayers pointerAtIndex:i];
+                    eventLayer.hidden = i >= self.numberOfEvents;
+                    eventLayer.frame = CGRectMake(2*i*diameter, (self.fs_height-diameter)*0.5, diameter, diameter);
+                    if (eventLayer.cornerRadius != diameter/2) {
+                        eventLayer.cornerRadius = diameter/2;
+                    }
                 }
             }
         }
